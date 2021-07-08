@@ -10,5 +10,8 @@ module.exports = {
     },
     devtool: 'source-map'
   },
-  lintOnSave: true
+  lintOnSave: true,
+  devServer: {
+    port: 8087
+  }
 };
