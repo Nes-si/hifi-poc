@@ -66,6 +66,21 @@
           Automatic Gain Control
         </label>
       </div>
+
+      <div class="panel-element panel-element-much-margin">
+        <label>
+          Gain:
+          <input type="number" v-model.number="gain" style="width: 50px">
+        </label>
+      </div>
+      <div class="panel-element">
+        <button
+          class="panel-element"
+          @click="setGain"
+        >
+          Set gain
+        </button>
+      </div>
     </div>
 
     <div v-if="usersLoaded" class="inner">
@@ -144,7 +159,9 @@ export default {
       autoGainControl: false,
 
       hifiAudioJWT: null,
-      hifiCommunicator: null
+      hifiCommunicator: null,
+
+      gain: 0
     }
   },
 
@@ -383,7 +400,15 @@ export default {
         if (userDis)
           array.splice(index, 1);
       }, []);
+    },
+
+    setGain() {
+      if (this.hifiCommunicator)
+        this.hifiCommunicator.updateUserDataAndTransmit({
+          hiFiGain: this.gain
+        });
     }
+
   },
 
   async created() {
@@ -433,6 +458,9 @@ h3 {
 }
 .panel-element:first-child {
   margin-left: 0;
+}
+.panel-element-much-margin {
+  margin-left: 50px;
 }
 
 .audio-selector {
