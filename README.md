@@ -1,4 +1,4 @@
-# test-vue-konva
+# hifi-poc
 
 ## Project setup
 ```
