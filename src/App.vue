@@ -155,6 +155,14 @@ export default {
         return;
       }
 
+      // Just for get mic permissions
+      try {
+        await navigator.mediaDevices.getUserMedia({video: false, audio: true});
+      } catch(err) {
+        console.log("Can't get microphone permission:" + err);
+        return;
+      };
+
       // Some browsers require that the user interact with the DOM before `enumerateDevices()` can be called.
       // This code attempts to call `enumerateDevices()` immediately when the user navigates to the website.
       let ioDevices;
