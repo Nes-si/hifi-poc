@@ -150,6 +150,16 @@ export default {
     },
     onDragend(e) {
       this.dragItemId = null;
+    },
+    onWheel({evt}) {
+      evt.preventDefault();
+      if (evt.deltaY < 0) {
+        this.stageConfig.scaleX *= 1.1;
+        this.stageConfig.scaleY *= 1.1;
+      } else if (evt.deltaY > 0) {
+        this.stageConfig.scaleX /= 1.1;
+        this.stageConfig.scaleY /= 1.1;
+      }
     }
   },
   watch: {
@@ -164,6 +174,7 @@ export default {
     this.updateData();
   },
   mounted() {
+    this.$refs.stage.getNode().on('wheel', this.onWheel);
     this.onResize();
   }
 };
