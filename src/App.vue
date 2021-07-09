@@ -81,6 +81,21 @@
           Set gain
         </button>
       </div>
+
+      <div class="panel-element panel-element-much-margin">
+        <label>
+          Threshold:
+          <input type="number" v-model.number="threshold" style="width: 50px">
+        </label>
+      </div>
+      <div class="panel-element">
+        <button
+          class="panel-element"
+          @click="setThreshold"
+        >
+          Set threshold
+        </button>
+      </div>
     </div>
 
     <div v-if="usersLoaded" class="inner">
@@ -161,7 +176,8 @@ export default {
       hifiAudioJWT: null,
       hifiCommunicator: null,
 
-      gain: 0
+      gain: 1,
+      threshold: -96
     }
   },
 
@@ -220,7 +236,6 @@ export default {
     },
 
     async getInputStream() {
-      let stream;
       const constraints = {
         echoCancellation: this.echoCancellation,
         noiseSuppression: this.noiseSuppression,
@@ -406,6 +421,12 @@ export default {
       if (this.hifiCommunicator)
         this.hifiCommunicator.updateUserDataAndTransmit({
           hiFiGain: this.gain
+        });
+    },
+    setThreshold() {
+      if (this.hifiCommunicator)
+        this.hifiCommunicator.updateUserDataAndTransmit({
+          volumeThreshold: this.threshold
         });
     }
 
