@@ -118,6 +118,8 @@ export default {
       const user = this.users.find(u =>
         u.providedUserID == this.userId
       );
+      if (!user)
+        return;
 
       //this.userData.x = user.position ? user.position.x * DIVISOR + OFFSET : 0;
       //this.userData.y = user.position ? user.position.y * DIVISOR + OFFSET : 0;
