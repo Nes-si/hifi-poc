@@ -18,7 +18,7 @@
           <b>Audio Input Devices:</b>
           <select
             v-model="inputDevice"
-            :disabled="!outputDevices.length"
+            :disabled="!inputDevices.length"
             class="selector"
             @change="onConstraintsChange"
           >
