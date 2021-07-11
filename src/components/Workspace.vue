@@ -3,30 +3,45 @@
     <v-stage
       ref="stage"
       :config="stageConfig"
-      @dragstart="onDragstart"
-      @dragend="onDragend"
       @dragmove="onDragmove"
+      @mousemove="onMouseMove"
+      @mouseup="onMouseUp"
     >
       <v-layer ref="layer">
         <v-group ref="group">
-          <v-circle
+          <v-group
             v-for="user in otherUsers"
             :key="user.id"
             :config="{
-              id: user.id,
               x: user.x,
               y: user.y,
-              rotation: 0,
-              radius: 20,
-              fill: user.color,
-              opacity: user.opacity,
               scaleX: user.scale,
               scaleY: user.scale,
-              shadowColor: 'black',
-              shadowBlur: 10,
-              shadowOpacity: 0.6
+              rotation: user.rotation
             }"
-          />
+          >
+            <v-circle
+              :config="{
+                x: 0,
+                y: 0,
+                radius: 20,
+                fill: user.color,
+                opacity: user.opacity,
+                shadowColor: 'black',
+                shadowBlur: 10,
+                shadowOpacity: 0.6
+              }"
+            />
+            <v-circle
+              :config="{
+                  x: 0,
+                  y: -26,
+                  radius: 8,
+                  fill: 'red'
+                }"
+            />
+          </v-group>
+
           <v-star
             :config="{
               id: userId,
@@ -42,12 +57,27 @@
               shadowBlur: 10,
               shadowOpacity: 0.6,
 
-              shadowOffsetX: dragItemId === userId ? 10 : 5,
-              shadowOffsetY: dragItemId === userId ? 10 : 5,
-              scaleX: dragItemId === userId ? userData.scale * 1.1 : userData.scale,
-              scaleY: dragItemId === userId ? userData.scale * 1.1 : userData.scale,
+              shadowOffsetX: dragging ? 10 : 5,
+              shadowOffsetY: dragging ? 10 : 5,
+              scaleX: dragging ? userData.scale * 1.1 : userData.scale,
+              scaleY: dragging ? userData.scale * 1.1 : userData.scale,
               draggable: true
             }"
+            @mousedown="onDragStart"
+          />
+          <v-circle
+            :config="{
+              x: userData.x,
+              y: userData.y,
+              radius: 5,
+              fill: 'red',
+              rotation: userData.rotation,
+              offset: {
+                x: 0,
+                y: 40 * (dragging ? userData.scale * 1.1 : userData.scale),
+              }
+            }"
+            @mousedown="onRotationStart"
           />
         </v-group>
 
@@ -57,11 +87,11 @@
 </template>
 
 <script>
-import {Point3D} from 'hifi-spatial-audio';
+import {OrientationEuler3D, Point3D} from 'hifi-spatial-audio';
+import {DIVISOR} from '../App';
 import {generateColor} from '@/utils';
 
 const OFFSET = 100;
-const DIVISOR = 100;
 
 export default {
   name: "Workspace",
@@ -74,7 +104,13 @@ export default {
     return {
       OFFSET,
 
-      dragItemId: null,
+      dragging: false,
+      rotating: false,
+      rotatingStartX: 0,
+      rotatingStartY: 0,
+      userRotationStart: 0,
+
+      rotatingX: 0,
 
       userData: {
         x: OFFSET,
@@ -84,6 +120,9 @@ export default {
         scale: 1,
         color: 'black'
       },
+      userPosition: new Point3D({x: 0, y: 0, z: 0}),
+      userOrientation: new OrientationEuler3D({pitch: 0, yaw: 0, roll: 0}),
+
       otherUsers: [],
 
       stageConfig: {
@@ -98,7 +137,7 @@ export default {
   methods: {
     updateData() {
       const otherUsers = this.users.filter(u =>
-        u.providedUserID != this.userId && u.position
+        u.providedUserID != this.userId
       );
       this.otherUsers = otherUsers.map(u => {
         const volume = (Math.max(-50, u.volumeDecibels) + 50) / 50;
@@ -106,10 +145,11 @@ export default {
         const scale = volume * .5 + .5;
         return {
           id: u.providedUserID,
-          x: u.position.x * DIVISOR + OFFSET,
-          y: u.position.y * DIVISOR + OFFSET,
+          x: u.position ? u.position.x * DIVISOR + OFFSET : 0,
+          y: u.position ? u.position.y * DIVISOR + OFFSET : 0,
           volume,
           opacity,
+          rotation: u.orientationEuler ? u.orientationEuler.yawDegrees : 0,
           scale,
           color: generateColor(u.providedUserID),
         };
@@ -133,26 +173,53 @@ export default {
       this.stageConfig.width = this.$refs.wrapper.clientWidth;
       this.stageConfig.height = this.$refs.wrapper.clientHeight;
     },
-    onDragstart(e) {
-      this.dragItemId = e.target.id();
+
+    onDragStart() {
+      this.dragging = true;
     },
     onDragmove(e) {
-      if (this.x != e.target.attrs.x || this.y != e.target.attrs.y) {
-        this.x = e.target.attrs.x;
-        this.y = e.target.attrs.y;
+      if (this.userData.x == e.target.attrs.x && this.userData.y == e.target.attrs.y)
+        return;
 
-        if (this.hifiCommunicator) {
-          const x = (this.x - OFFSET) / DIVISOR;
-          const y = (this.y - OFFSET) / DIVISOR;
-          this.hifiCommunicator.updateUserDataAndTransmit({
-            position: new Point3D({x, y, z: 0})
-          });
-        }
+      this.userData.x = e.target.attrs.x;
+      this.userData.y = e.target.attrs.y;
+
+      if (this.hifiCommunicator) {
+        this.userPosition.x = (this.userData.x - OFFSET) / DIVISOR;
+        this.userPosition.y = (this.userData.y - OFFSET) / DIVISOR;
+        this.hifiCommunicator.updateUserDataAndTransmit({
+          position: this.userPosition
+        });
       }
     },
-    onDragend(e) {
-      this.dragItemId = null;
+
+    onRotationStart(e) {
+      this.rotating = true;
+      this.rotatingStartX = e.evt.x;
+      this.rotatingStartY = e.evt.y;
+      this.userRotationStart = this.userData.rotation;
     },
+    onMouseMove(e) {
+      if (!this.rotating)
+        return;
+
+      let diff = e.evt.x - this.rotatingStartX;
+      //diff += e.evt.y - this.rotatingStartY;
+      this.userData.rotation = this.userRotationStart + diff;
+
+      if (this.hifiCommunicator) {
+        this.userOrientation.yawDegrees = this.userData.rotation;
+        this.hifiCommunicator.updateUserDataAndTransmit({
+          orientationEuler: this.userOrientation
+        });
+      }
+    },
+
+    onMouseUp() {
+      this.dragging = false;
+      this.rotating = false;
+    },
+
     onWheel({evt}) {
       evt.preventDefault();
       if (evt.deltaY < 0) {

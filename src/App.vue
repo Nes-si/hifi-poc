@@ -109,7 +109,8 @@
         >
           <p><b>User:</b> {{user.providedUserID}}</p>
           <p v-if="user.volumeDecibels !== undefined"><b>Volume:</b> {{user.volumeDecibels}} dB</p>
-          <p v-if="user.position"><b>Position:</b> {{Math.round(user.position.x * DIVISOR)}} {{Math.round(user.position.y * DIVISOR)}}</p>
+          <p v-if="user.position"><b>Position:</b> {{user.position.x}} {{user.position.y}}</p>
+          <p v-if="user.orientationEuler"><b>Orientation:</b> {{Math.round(user.orientationEuler.yawDegrees)}}°</p>
           <p><b>Color:</b> <span :style="{color: 'rgba(0, 0, 0, 0)', backgroundColor: user.color}">WWWWW</span></p>
         </div>
       </div>
@@ -136,10 +137,10 @@
 import Parse from 'parse';
 import {HiFiAudioAPIData, HiFiCommunicator, Point3D, OrientationEuler3D, UserDataSubscription,
   AvailableUserDataSubscriptionComponents} from 'hifi-spatial-audio';
-import {guid, generateColor} from "@/utils";
+import {generateId, generateColor} from "@/utils";
 import Workspace from './components/Workspace.vue';
 
-const DIVISOR = 100;
+export const DIVISOR = 100;
 
 
 
@@ -154,7 +155,7 @@ export default {
     return {
       DIVISOR,
 
-      userId: guid(),
+      userId: generateId(),
       users: [],
       usersLoaded: false,
 
@@ -230,8 +231,8 @@ export default {
     async setJWTtoken() {
       this.hifiAudioJWT = await Parse.Cloud.run("generateAudioJWT", {
         userID: this.userId,
-        vulcanSpaceId: '63744f4a-1613-40b5-b380-582468ad7820',
-        spaceName: 'Space'
+        vulcanSpaceId: '6c3be7c3-f9a1-5144-173c-bc4acd66e03d',
+        spaceName: 'Test'
       });
     },
 
@@ -270,7 +271,7 @@ export default {
       // They'll be standing at the origin, facing "forward".
       let initialHiFiAudioAPIData = new HiFiAudioAPIData({
         position: new Point3D({"x": 0, "y": 0, "z": 0}),
-        orientationEuler: new OrientationEuler3D({"pitch": 0, "yaw": 0, "roll": 0})
+        orientationEuler: new OrientationEuler3D({"pitchDegrees": 0, "yawDegrees": 0, "rollDegrees": 0})
       });
 
       // Set up our `HiFiCommunicator` object, supplying our media stream and initial user data.
@@ -510,6 +511,7 @@ h3 {
   margin-right: 10px;
   padding: 10px;
   text-align: center;
+  width: 180px;
 }
 
 .user-current {
