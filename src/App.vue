@@ -108,10 +108,11 @@
           :class="{'user-current': user.providedUserID == userId}"
         >
           <p><b>User:</b> {{user.providedUserID}}</p>
-          <p v-if="user.volumeDecibels !== undefined"><b>Volume:</b> {{user.volumeDecibels}} dB</p>
-          <p v-if="user.position"><b>Position:</b> {{user.position.x}} {{user.position.z}}</p>
-          <p v-if="user.orientationEuler"><b>Orientation:</b> {{Math.round(user.orientationEuler.yawDegrees)}}°</p>
+          <p><b>Position:</b> {{user.position ? `${user.position.x} ${user.position.z}` : `undefined`}}</p>
+          <p><b>Orientation:</b> {{user.orientationEuler ? Math.round(user.orientationEuler.yawDegrees) : 'undefined'}}°</p>
           <p><b>Color:</b> <span :style="{color: 'rgba(0, 0, 0, 0)', backgroundColor: user.color}">WWWWW</span></p>
+          <p><b>Hi-Fi gain:</b> {{user.hiFiGain}}</p>
+          <p><b>Level:</b> {{user.volumeDecibels}} dB</p>
         </div>
       </div>
 
@@ -398,6 +399,8 @@ export default {
 
           if (typeof (_user.volumeDecibels) === "number")
             user.volumeDecibels = _user.volumeDecibels;
+          if (typeof (_user.hiFiGain) === "number")
+            user.hiFiGain = _user.hiFiGain;
 
         } else {
           _user.color = generateColor(_user.providedUserID);
