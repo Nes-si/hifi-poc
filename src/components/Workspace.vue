@@ -146,7 +146,7 @@ export default {
         return {
           id: u.providedUserID,
           x: u.position ? u.position.x * DIVISOR + OFFSET : 0,
-          y: u.position ? u.position.y * DIVISOR + OFFSET : 0,
+          y: u.position ? u.position.z * DIVISOR + OFFSET : 0,
           volume,
           opacity,
           rotation: u.orientationEuler ? u.orientationEuler.yawDegrees : 0,
@@ -162,7 +162,7 @@ export default {
         return;
 
       //this.userData.x = user.position ? user.position.x * DIVISOR + OFFSET : 0;
-      //this.userData.y = user.position ? user.position.y * DIVISOR + OFFSET : 0;
+      //this.userData.y = user.position ? user.position.z * DIVISOR + OFFSET : 0;
       this.userData.volume = (Math.max(-50, user.volumeDecibels) + 50) / 50;
       this.userData.opacity = this.userData.volume * .6 + .4;
       this.userData.scale = this.userData.volume * .4 + .6;
@@ -186,7 +186,7 @@ export default {
 
       if (this.hifiCommunicator) {
         this.userPosition.x = (this.userData.x - OFFSET) / DIVISOR;
-        this.userPosition.y = (this.userData.y - OFFSET) / DIVISOR;
+        this.userPosition.z = (this.userData.y - OFFSET) / DIVISOR;
         this.hifiCommunicator.updateUserDataAndTransmit({
           position: this.userPosition
         });
@@ -208,7 +208,7 @@ export default {
       this.userData.rotation = this.userRotationStart + diff;
 
       if (this.hifiCommunicator) {
-        this.userOrientation.yawDegrees = this.userData.rotation;
+        this.userOrientation.yawDegrees = - this.userData.rotation;
         this.hifiCommunicator.updateUserDataAndTransmit({
           orientationEuler: this.userOrientation
         });

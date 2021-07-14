@@ -109,7 +109,7 @@
         >
           <p><b>User:</b> {{user.providedUserID}}</p>
           <p v-if="user.volumeDecibels !== undefined"><b>Volume:</b> {{user.volumeDecibels}} dB</p>
-          <p v-if="user.position"><b>Position:</b> {{user.position.x}} {{user.position.y}}</p>
+          <p v-if="user.position"><b>Position:</b> {{user.position.x}} {{user.position.z}}</p>
           <p v-if="user.orientationEuler"><b>Orientation:</b> {{Math.round(user.orientationEuler.yawDegrees)}}°</p>
           <p><b>Color:</b> <span :style="{color: 'rgba(0, 0, 0, 0)', backgroundColor: user.color}">WWWWW</span></p>
         </div>
@@ -385,6 +385,7 @@ export default {
               user.position = new Point3D();
             user.position.x = _user.position.x;
             user.position.y = _user.position.y;
+            user.position.z = _user.position.z;
           }
 
           if (_user.orientationEuler) {
