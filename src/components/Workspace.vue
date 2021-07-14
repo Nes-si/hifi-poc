@@ -78,6 +78,7 @@
               }
             }"
             @mousedown="onRotationStart"
+            @dblclick="resetRotation"
           />
         </v-group>
 
@@ -92,6 +93,7 @@ import {DIVISOR} from '../App';
 import {generateColor} from '@/utils';
 
 const OFFSET = 100;
+const R2D = 180 / Math.PI;
 
 export default {
   name: "Workspace",
@@ -106,9 +108,8 @@ export default {
 
       dragging: false,
       rotating: false,
-      rotatingStartX: 0,
-      rotatingStartY: 0,
-      userRotationStart: 0,
+      baseAngle: 0,
+      startAngle: 0,
 
       rotatingX: 0,
 
@@ -193,19 +194,25 @@ export default {
       }
     },
 
+
+
+    getAngle(event) {
+      const dX = event.offsetX - this.userData.x;
+      const dY = event.offsetY - this.userData.y;
+      return R2D * Math.atan2(dY, dX);
+    },
+
     onRotationStart(e) {
       this.rotating = true;
-      this.rotatingStartX = e.evt.x;
-      this.rotatingStartY = e.evt.y;
-      this.userRotationStart = this.userData.rotation;
+      this.baseAngle = this.userData.rotation;
+      this.startAngle = this.getAngle(e.evt);
     },
     onMouseMove(e) {
       if (!this.rotating)
         return;
 
-      let diff = e.evt.x - this.rotatingStartX;
-      //diff += e.evt.y - this.rotatingStartY;
-      this.userData.rotation = this.userRotationStart + diff;
+      const angle = this.getAngle(e.evt);
+      this.userData.rotation = this.baseAngle - this.startAngle + angle;
 
       if (this.hifiCommunicator) {
         this.userOrientation.yawDegrees = - this.userData.rotation;
@@ -218,6 +225,17 @@ export default {
     onMouseUp() {
       this.dragging = false;
       this.rotating = false;
+    },
+
+
+    resetRotation() {
+      this.userData.rotation = 0;
+      if (this.hifiCommunicator) {
+        this.userOrientation.yawDegrees = 0;
+        this.hifiCommunicator.updateUserDataAndTransmit({
+          orientationEuler: this.userOrientation
+        });
+      }
     },
 
     onWheel({evt}) {
