@@ -196,7 +196,7 @@ export default {
       } catch(err) {
         console.log("Can't get microphone permission:" + err);
         return;
-      };
+      }
 
       // Some browsers require that the user interact with the DOM before `enumerateDevices()` can be called.
       // This code attempts to call `enumerateDevices()` immediately when the user navigates to the website.
@@ -270,9 +270,9 @@ export default {
 
       // Set up the initial data for our user.
       // They'll be standing at the origin, facing "forward".
-      let initialHiFiAudioAPIData = new HiFiAudioAPIData({
-        position: new Point3D({"x": 0, "y": 0, "z": 0}),
-        orientationEuler: new OrientationEuler3D({"pitchDegrees": 0, "yawDegrees": 0, "rollDegrees": 0})
+      const initialHiFiAudioAPIData = new HiFiAudioAPIData({
+        position: new Point3D({x: 0, y: 0, z: 0}),
+        orientationEuler: new OrientationEuler3D({pitchDegrees: 0, yawDegrees: 0, rollDegrees: 0})
       });
 
       // Set up our `HiFiCommunicator` object, supplying our media stream and initial user data.
