@@ -232,8 +232,8 @@ export default {
     async setJWTtoken() {
       this.hifiAudioJWT = await Parse.Cloud.run("generateAudioJWT", {
         userID: this.userId,
-        vulcanSpaceId: '6c3be7c3-f9a1-5144-173c-bc4acd66e03d',
-        spaceName: 'Test'
+        vulcanSpaceId: process.env.VUE_APP_SPACE_ID,
+        spaceName: process.env.VUE_APP_SPACE_NAME
       });
     },
 

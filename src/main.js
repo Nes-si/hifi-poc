@@ -5,15 +5,16 @@ import Parse from 'parse';
 
 import 'normalize.css';
 
+
 Vue.use(VueKonva);
 
-Vue.config.productionTip = false
+Vue.config.productionTip = false;
 
 
-Parse.initialize('5ed72354cfdada53571121136ae1be7b');
-Parse.serverURL = 'https://master.parse-server-524115.c66.me:40088/parse';
+Parse.initialize(process.env.VUE_APP_PARSE_SERVER_APP_ID);
+Parse.serverURL = process.env.VUE_APP_PARSE_SERVER_URL;
 
 
 new Vue({
   render: h => h(App),
-}).$mount('#app')
+}).$mount('#app');
