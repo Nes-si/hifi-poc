@@ -13,7 +13,7 @@
     </div>
 
     <div class="panel">
-      <div class="panel-element audio-selector">
+      <div class="panel-element">
         <label>
           <b>Audio Input Devices:</b>
           <select
@@ -29,7 +29,7 @@
           </select>
         </label>
       </div>
-      <div class="panel-element audio-selector">
+      <div class="panel-element">
         <label>
           <b>Audio Output Devices:</b>
           <select
@@ -487,9 +487,6 @@ h3 {
 }
 .panel-element-much-margin {
   margin-left: 50px;
-}
-
-.audio-selector {
 }
 
 .selector {
